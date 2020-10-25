@@ -4,7 +4,7 @@ A sample handler implementation to block API requests based on IP addresses (app
 
 > To use the handler implementation on lower versions of the API Manager, please change the required dependency versions in the `pom.xml` and build the project as instructed in [Build](#build).
 
-### Build
+## Build
 
 Execute the following command from the root directory of the project to build
 
@@ -12,7 +12,7 @@ Execute the following command from the root directory of the project to build
 mvn clean package
 ```
 
-### Usage
+## Usage
 
 Copy the built JAR artifact and place it inside the `<gateway>/repository/components/lib` directory and start the server to load the required classes. 
 
@@ -27,6 +27,40 @@ After a successful server start, navigate to `<apim>/repository/deployment/serve
 </handler>
 ```
 
-### License
+### Configure Velocity Template
+
+We can introduce an API Property to configure the IP Regex patterns from the Publisher UI to change the values dynamically. Please follow the given instructions to make the required changes in the API Manager server
+
+> Please note the built JAR artifact has to be placed inside the `<apim>/repository/components/lib` directory prior to applying the following changes
+>
+> A complete `velocity_template.xml` can be found under [here](example/velocity_template.xml)
+
+- Navigate and open the `<apim>/repository/resources/api_templates/velocity_template.xml` and add the following changes
+  
+    ```xml
+    ...
+    <handlers xmlns="http://ws.apache.org/ns/synapse">
+    #foreach($handler in $handlers)
+
+        #if($handler.className == 'org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler')
+            #if($apiObj.additionalProperties.get('IPRegex'))
+                <handler class="com.sample.handlers.IPBlockHandler">
+                    <property name="IPRegex" value="$apiObj.additionalProperties.get('IPRegex')" />
+                </handler>
+            #end
+        #end
+
+        <handler xmlns="http://ws.apache.org/ns/synapse" class="$handler.className">
+    ...
+    ```
+
+- Save the `velocity_template.xml`
+- Log-in to the Publisher portal and open the specific API that you want to perform IP blocking
+- Go to Properties section and add the following property with the Regex pattern
+  - Property Name: `IPRegex`
+  - Property Value: `^(127\.0\.0\.[1-5])$`
+- Click on `Add` and then click on `Save` to publish the API with the changes
+
+## License
 
 [Apache 2.0 License](LICENSE)
