@@ -1,6 +1,9 @@
-package com.sample.handlers;
+package com.sample.mediators;
 
 import java.util.Map;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -13,8 +16,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -27,31 +31,34 @@ import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
  * This is a sample handler implementation which checks the extracted Client IP
  * address against the specified IP Regex pattern in the Handler
  */
-public class IPBlockHandler extends AbstractHandler {
-
-    private String ipRegexPattern;
+public class IPBlockMediator extends AbstractMediator {
 
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
-    private static final Log log = LogFactory.getLog(IPBlockHandler.class);
+    private static final Log logger = LogFactory.getLog(IPBlockMediator.class);
 
     @Override
-    public boolean handleRequest(MessageContext messageContext) {
-        String clientIP = getClientIP(messageContext);
+    public boolean mediate(MessageContext synCtx) {
+        String clientIP = getClientIP(synCtx);
 
-        if (log.isDebugEnabled()) {
-            log.debug("Handling request and validating the Client IP : " + clientIP
-                    + " against the specified condition : " + ipRegexPattern);
+        String applicationName = (String) synCtx.getProperty("api.ut.application.name");
+        Entry localEntryObj = (Entry) synCtx.getConfiguration().getLocalRegistry().get("ip-block");
+
+        if (localEntryObj != null && localEntryObj.getValue() != null && applicationName != null) {
+            JsonParser jsonParser = new JsonParser();
+            JsonObject node = jsonParser.parse(localEntryObj.getValue().toString()).getAsJsonObject();
+            String ipRegexPattern = node.get(applicationName) != null ? node.get(applicationName).getAsString() : null;
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Handling request and validating the Client IP : " + clientIP
+                        + " against the specified condition : " + ipRegexPattern);
+            }
+
+            if (StringUtils.isNotEmpty(ipRegexPattern) && clientIP.matches(ipRegexPattern)) {
+                handleBlockedRequest(synCtx);
+                return false;
+            }
         }
 
-        if (StringUtils.isNotEmpty(ipRegexPattern) && clientIP.matches(ipRegexPattern)) {
-            handleBlockedRequest(messageContext);
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean handleResponse(MessageContext messageContext) {
         return true;
     }
 
@@ -63,8 +70,8 @@ public class IPBlockHandler extends AbstractHandler {
      */
     @SuppressWarnings("unchecked")
     private String getClientIP(MessageContext context) {
-        if (log.isDebugEnabled()) {
-            log.debug("Extracting Client IP from Headers");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Extracting Client IP from Headers");
         }
         String clientIP;
 
@@ -82,8 +89,8 @@ public class IPBlockHandler extends AbstractHandler {
             clientIP = (String) axis2Context.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Extracted Client IP of the request : " + clientIP);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Extracted Client IP of the request : " + clientIP);
         }
 
         return clientIP;
@@ -109,7 +116,7 @@ public class IPBlockHandler extends AbstractHandler {
         try {
             RelayUtils.consumeAndDiscardMessage(axis2MC);
         } catch (AxisFault axisFault) {
-            log.error("Error occurred while consuming and discarding the message", axisFault);
+            logger.error("Error occurred while consuming and discarding the message", axisFault);
         }
 
         if (context.isDoingPOX() || context.isDoingGET()) {
@@ -142,13 +149,5 @@ public class IPBlockHandler extends AbstractHandler {
         payload.addChild(errorMessage);
         payload.addChild(errorDescription);
         return payload;
-    }
-
-    public void setIPRegex(String regex) {
-        this.ipRegexPattern = regex;
-    }
-
-    public String getIPRegex() {
-        return this.ipRegexPattern;
     }
 }
