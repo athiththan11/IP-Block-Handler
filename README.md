@@ -28,7 +28,7 @@ After a successful server start, navigate to `<apim>/repository/deployment/serve
 {"DefaultApplication": "^(127\\.0\\.0\\.[1-5])$"}
 </localEntry>
 ```
-    
+
 Then add either a Global mediation sequence or a API specific mediation sequence as per your requirement and define the following class mediator.
 
 ```xml
