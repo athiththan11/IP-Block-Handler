@@ -4,6 +4,10 @@ A sample handler implementation to block API requests based on IP addresses (app
 
 > To use the handler implementation on lower versions of the API Manager, please change the required dependency versions in the `pom.xml` and build the project as instructed in [Build](#build).
 
+> **Mediator Implementation**
+>
+> Find the mediator implementation of the IP-Block under the [medaitor](https://github.com/athiththan11/IP-Block-Handler/tree/mediator) branch with the instructions on engaging the mediator in `Global Mediation sequence` with `local-entries`
+
 ## Build
 
 Execute the following command from the root directory of the project to build
