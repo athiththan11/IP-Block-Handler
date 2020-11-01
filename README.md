@@ -6,7 +6,7 @@ A sample handler implementation to block API requests based on IP addresses (app
 
 > **Mediator Implementation**
 >
-> Find the mediator implementation of the IP-Block under the [medaitor](https://github.com/athiththan11/IP-Block-Handler/tree/mediator) branch with the instructions on engaging the mediator in `Global Mediation sequence` with `local-entries`
+> Find the mediator implementation of the IP-Block under the [mediator](https://github.com/athiththan11/IP-Block-Handler/tree/mediator) branch with the instructions on engaging the mediator in `Global Mediation sequence` with `local-entries`
 
 ## Build
 
