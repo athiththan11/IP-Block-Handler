@@ -17,7 +17,6 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 
@@ -102,7 +101,6 @@ public class IPBlockHandler extends AbstractHandler {
         context.setProperty(SynapseConstants.ERROR_CODE, "-1");
         context.setProperty(SynapseConstants.ERROR_MESSAGE, message);
         context.setProperty(SynapseConstants.ERROR_DETAIL, description);
-        context.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, statusCode);
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) context).getAxis2MessageContext();
         axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);

@@ -1,6 +1,6 @@
 # IP Blocking Handler
 
-A sample handler implementation to block API requests based on IP addresses (applied per API level and not global). The implementation presented in the `main` branch supports WSO2 API Manager v3.2.0.
+A sample handler implementation to block API requests based on IP addresses (applied per API level and not global). The implementation presented in the `apim-2.2.0` branch supports WSO2 API Manager v2.2.0.
 
 > To use the handler implementation on lower versions of the API Manager, please change the required dependency versions in the `pom.xml` and build the project as instructed in [Build](#build).
 
